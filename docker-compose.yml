@@ -1,0 +1,28 @@
+services:
+
+  items_db:
+    image: postgres:17
+    restart: always
+    environment:
+      POSTGRES_DB: founditems
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: moscowlostandfound
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    depends_on:
+      - items_db
+    ports:
+      - "8000:8000"
+
+  tg-bot:
+    build: ./tg-bot
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
