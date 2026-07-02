@@ -1,7 +1,7 @@
 services:
 
   items_db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17
     restart: always
     environment:
       POSTGRES_DB: founditems

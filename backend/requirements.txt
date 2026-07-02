@@ -5,6 +5,7 @@ psycopg[binary]==3.2.9
 alembic==1.16.4
 python-dotenv==1.1.1
 pydantic_settings==2.14.2
-sentence-transformers
-torch
-numpy
+pgvector==0.4.2
+sentence-transformers==5.1.1
+torch==2.12.1
+numpy==2.5.0
