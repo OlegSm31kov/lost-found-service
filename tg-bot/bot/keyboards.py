@@ -6,3 +6,12 @@ menu_keyboard = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+location_keyboard = ReplyKeyboardMarkup(
+    [
+        [KeyboardButton("В вагоне")],
+        [KeyboardButton("На станции")],
+        [KeyboardButton("Не помню")]
+    ],
+    resize_keyboard=True
+)

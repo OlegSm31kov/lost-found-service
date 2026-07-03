@@ -2,53 +2,82 @@ from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, filters
 
-from keyboards import menu_keyboard
+from keyboards import menu_keyboard, location_keyboard
 from backend_client import find_item
 
 DATE = 0
 STATION = 1
-SUMMARY = 2
+LOCATION = 2
+SUMMARY = 3
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Что вы хотите сделать?",reply_markup=menu_keyboard)
 
 async def new_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Введите дату утери в формате ДД.ММ.ГГ")
-    return DATE
-
-async def get_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        context.user_data["date"] = datetime.strptime(update.message.text, "%d.%m.%y").date()
-        await update.message.reply_text(
-            "Введите станцию, где вы потеряли вещь"
-        )
-        return STATION
-    except ValueError:
-        await update.message.reply_text(
-            "Неверный формат даты.\n"
-            "Используйте ДД.ММ.ГГ или ДД.ММ.ГГГГ."
-        )
-        return DATE
-
-async def get_station(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # todo: либо сделать выбор, либо добавить проверку
-    context.user_data["station"] = update.message.text
+    context.user_data.clear()
 
     await update.message.reply_text(
-        "Введите описание утерянной вещи\n"
-        "Постарайтесь описать её как можно подробнее, "
-        "если это пакет или сумка - опишите содержимое"
+        "Опишите потерянную вещь для поиска\n"
+        "Постарайтесь описать её как можно более подробно и точно"
     )
-
     return SUMMARY
 
 async def get_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
     context.user_data["summary"] = update.message.text
-    await update.message.reply_text("Ищем, есть ли у нас такая вещь...")
 
-    result = await find_item(context.user_data)
-    await update.message.reply_text(f"Ответ:\n{result}")
+    await update.message.reply_text("Введите дату потери (ДД.ММ.ГГ или ДД.ММ.ГГГГ):")
+    return DATE
+
+async def get_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+
+    for fmt in ("%d.%m.%y", "%d.%m.%Y"):
+        try:
+            date_lost = datetime.strptime(text, fmt).date()
+            break
+        except ValueError:
+            date_lost = None
+
+    if not date_lost:
+        await update.message.reply_text("Неверный формат даты")
+        return DATE
+
+    context.user_data["date_lost"] = date_lost
+
+    await update.message.reply_text("Введите станцию метро, где вы потеряли вещь")
+    return STATION
+
+async def get_station(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # либо сделать строгий выбор, либо добавить проверку
+    context.user_data["station"] = update.message.text
+
+    await update.message.reply_text(
+        "Где вы оставили вещь?", reply_markup=location_keyboard
+    )
+
+    return LOCATION
+
+async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["location"] = update.message.text
+
+    await update.message.reply_text("Ищу совпадения...")
+
+    result = await find_item(
+        date_lost=context.user_data["date_lost"],
+        station=context.user_data["station"],
+        summary=context.user_data["summary"],
+        location=context.user_data["location"]
+    )
+
+    if result:
+        await update.message.reply_text(
+            "Ваша вещь найдена! Обратитесь за ней по адресу: ..."
+        )
+        print(result)  # лог в консоль backend/бота
+    else:
+        await update.message.reply_text(
+            "К сожалению, ваша вещь отсутствует среди найденных в метро"
+        )
 
     context.user_data.clear()
     return ConversationHandler.END

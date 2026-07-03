@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Item
 
-from backend.app.services.search_service import get_embedding
+from app.services.search_service import get_embedding
 
 
 def create_item(
