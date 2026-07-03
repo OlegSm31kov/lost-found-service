@@ -8,4 +8,4 @@ pydantic_settings==2.14.2
 pgvector==0.4.2
 sentence-transformers==3.0.1
 torch==2.2.2
-numpy==2.5.0
+numpy==1.26.4

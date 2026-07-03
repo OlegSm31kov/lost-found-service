@@ -1,6 +1,6 @@
 from datetime import datetime
 from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, filters
+from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, CallbackQueryHandler, filters
 
 from keyboards import menu_keyboard, location_keyboard
 from backend_client import find_item
@@ -58,7 +58,10 @@ async def get_station(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return LOCATION
 
 async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data["location"] = update.message.text
+    query = update.callback_query
+    await query.answer()
+
+    context.user_data["location"] = query.data
 
     await update.message.reply_text("Ищу совпадения...")
 
@@ -108,6 +111,10 @@ conversation = ConversationHandler(
                 filters.TEXT & ~filters.COMMAND,
                 get_station
             )
+        ],
+
+        LOCATION: [
+            CallbackQueryHandler(get_location)
         ],
 
         SUMMARY: [

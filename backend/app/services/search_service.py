@@ -23,23 +23,20 @@ def find(
     date_from = date_lost - timedelta(days=2)
     date_to = date_lost + timedelta(days=2)
 
+    print(date_lost)
+    print(date_from, date_to)
+
     distance = Item.embedding.cosine_distance(embedding)
 
     query = (
         db.query(Item)
         .filter(
             Item.station == station,
-            Item.date.between(date_from, date_to),
-            distance <= 0.4,
+            Item.date.between(date_from, date_to)
         )
     )
 
     if location is not None:
         query = query.filter(Item.location == location)
 
-    return (
-        query
-        .order_by(distance)
-        .limit(5)
-        .all()
-    )
+    return [item.id for item in query.order_by(distance).limit(5).all()]
