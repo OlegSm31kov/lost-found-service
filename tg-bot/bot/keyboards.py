@@ -1,4 +1,4 @@
-from telegram import KeyboardButton, ReplyKeyboardMarkup
+from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 
 menu_keyboard = ReplyKeyboardMarkup(
     [
@@ -7,11 +7,10 @@ menu_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-location_keyboard = ReplyKeyboardMarkup(
+location_keyboard = InlineKeyboardMarkup(
     [
-        [KeyboardButton("В вагоне")],
-        [KeyboardButton("На станции")],
-        [KeyboardButton("Не помню")]
-    ],
-    resize_keyboard=True
+        [InlineKeyboardButton("В вагоне", callback_data="В вагоне")],
+        [InlineKeyboardButton("На станции", callback_data="На станции")],
+        [InlineKeyboardButton("Не помню", callback_data="Не помню")],
+    ]
 )

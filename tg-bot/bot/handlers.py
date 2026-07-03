@@ -63,23 +63,23 @@ async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["location"] = query.data
 
-    await update.message.reply_text("Ищу совпадения...")
+    await query.edit_message_text("Ищу совпадения...")
 
     result = await find_item(
         date_lost=context.user_data["date_lost"],
         station=context.user_data["station"],
         summary=context.user_data["summary"],
-        location=context.user_data["location"]
+        location=context.user_data["location"],
     )
 
     if result:
-        await update.message.reply_text(
+        await query.message.reply_text(
             "Ваша вещь найдена! Обратитесь за ней по адресу: ..."
         )
-        print(result)  # лог в консоль backend/бота
+        print(result)
     else:
-        await update.message.reply_text(
-            "К сожалению, ваша вещь отсутствует среди найденных в метро"
+        await query.message.reply_text(
+            "К сожалению, ваша вещь отсутствует среди найденных в метро."
         )
 
     context.user_data.clear()

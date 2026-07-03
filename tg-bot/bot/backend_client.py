@@ -3,7 +3,7 @@ import httpx, os
 BACKEND_URL = "http://backend:8000"
 async def find_item(date_lost, station: str, summary: str, location: str | None):
     params = {
-        "date_lost": date_lost,
+        "date_lost": date_lost.isoformat(),
         "station": station,
         "summary": summary,
     }
