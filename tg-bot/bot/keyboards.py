@@ -1,9 +1,12 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 
 menu_keyboard = ReplyKeyboardMarkup(
-    [
-        [KeyboardButton("Подать новую заявку")]
-    ],
+    [[KeyboardButton("Подать новую заявку")]],
+    resize_keyboard=True
+)
+
+conversation_keyboard = ReplyKeyboardMarkup(
+    [[KeyboardButton("Отмена")]],
     resize_keyboard=True
 )
 

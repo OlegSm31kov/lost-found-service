@@ -2,7 +2,7 @@ from datetime import datetime
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, MessageHandler, CallbackQueryHandler, filters
 
-from keyboards import menu_keyboard, location_keyboard
+from keyboards import menu_keyboard, conversation_keyboard, location_keyboard
 from backend_client import find_item
 
 DATE = 0
@@ -11,7 +11,9 @@ LOCATION = 2
 SUMMARY = 3
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Что вы хотите сделать?",reply_markup=menu_keyboard)
+    await update.message.reply_text("Здравствуйте!\n"
+                                    "Я бот, который поможет вам найти вещь, потерянную в метро\n"
+                                    "Следуйте шагам, и я подскажу, есть ли ваша вещь у нас",reply_markup=menu_keyboard)
 
 async def new_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
@@ -20,6 +22,7 @@ async def new_request(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Опишите потерянную вещь для поиска\n"
         "Постарайтесь описать её как можно более подробно и точно"
     )
+    reply_markup = conversation_keyboard
     return SUMMARY
 
 async def get_summary(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -63,7 +66,7 @@ async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.user_data["location"] = query.data
 
-    await query.edit_message_text("Ищу совпадения...")
+    await query.message.reply_text("Ищу совпадения...")
 
     result = await find_item(
         date_lost=context.user_data["date_lost"],
@@ -73,12 +76,13 @@ async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     if result:
-        await query.message.reply_text(
-            "Ваша вещь найдена! Обратитесь за ней по адресу: ..."
+        await query.edit_message_text(
+            "Ваша вещь найдена! Обратитесь за ней по адресу: ...",
+            reply_markup=menu_keyboard
         )
         print(result)
     else:
-        await query.message.reply_text(
+        await query.edit_message_text(
             "К сожалению, ваша вещь отсутствует среди найденных в метро."
         )
 
@@ -87,7 +91,8 @@ async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
-    await update.message.reply_text("Создание заявки отменено")
+    await update.message.reply_text("Создание заявки отменено", reply_markup=menu_keyboard)
+
     return ConversationHandler.END
 
 conversation = ConversationHandler(
@@ -125,5 +130,5 @@ conversation = ConversationHandler(
         ],
     },
 
-    fallbacks=[]
+    fallbacks=[MessageHandler(filters.Regex("^Отмена$"), cancel)]
 )
