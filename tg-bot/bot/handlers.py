@@ -76,13 +76,13 @@ async def get_location(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     if result:
-        await query.edit_message_text(
+        await query.message.reply_text(
             "Ваша вещь найдена! Обратитесь за ней по адресу: ...",
             reply_markup=menu_keyboard
         )
         print(result)
     else:
-        await query.edit_message_text(
+        await query.message.reply_text(
             "К сожалению, ваша вещь отсутствует среди найденных в метро."
         )
 
